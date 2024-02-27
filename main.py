@@ -1,5 +1,5 @@
 
-TOKEN = ''
+TOKEN = 'MTIxMDE3MzY5NzA5NzMzNDg0NQ.GwXM-Z.L-Hy_1N7FVzJTWrlgWaz5nhIXCgz-rlUtybVCI'
 
 
 import discord
