@@ -1,4 +1,4 @@
-TOKEN = 'MTIxMDE3MzY5NzA5NzMzNDg0NQ.GzSexO.Wb9sFLplR_z-_Y6V43QE83yfCLt83dcrXdPRUg'
+TOKEN = 'token'
 
 import discord
 from discord import app_commands
