@@ -1,4 +1,4 @@
-TOKEN = 'token'
+TOKEN = 'MTIxMDE3MzY5NzA5NzMzNDg0NQ.GzSexO.Wb9sFLplR_z-_Y6V43QE83yfCLt83dcrXdPRUg'
 
 import discord
 from discord import app_commands
@@ -38,5 +38,5 @@ async def on_message(message):
 async def help(interaction: discord.Interaction):
     await interaction.response.send_message(f"Hey! I'm the discord bot for Thematic Project, from Faheem, Maiko, Farjana, Zakariya, Andrea, Alex, Harris\n"
                                f"I'm here to help you build a PC (coming soon)")
-    
+
 bot.run(TOKEN)
