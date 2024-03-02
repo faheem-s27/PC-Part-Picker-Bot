@@ -7,6 +7,7 @@ from discord import app_commands
 from discord.ext import tasks, commands
 import asyncio
 
+
 intents = discord.Intents.all()
 intents.message_content = True
 intents.members = True
@@ -105,7 +106,8 @@ async def ask_for_preferences(ctx):
 def chunk_list(lst, n):
     return [lst[i:i + n] for i in range(0, len(lst), n)]
 
-# Function to display CPU results with pagination
+
+
 async def display_cpu_results(ctx, cpus):
     chunked_cpus = [cpus[i:i + 5] for i in range(0, len(cpus), 5)]
     current_page = 0
@@ -122,31 +124,59 @@ async def display_cpu_results(ctx, cpus):
     def check(reaction, user):
         return user == ctx.author and reaction.message == message and str(reaction.emoji) in ["⬅️", "➡️"]
 
-    while True:
-        try:
-            reaction, user = await bot.wait_for("reaction_add", timeout=600, check=check)
-            await message.remove_reaction(reaction, user)
+    async def on_reaction(reaction, user):
+        nonlocal current_page
 
-            if str(reaction.emoji) == "➡️" and current_page < len(chunked_cpus) - 1:
-                current_page += 1
-            elif str(reaction.emoji) == "⬅️" and current_page > 0:
-                current_page -= 1
+        if str(reaction.emoji) == "➡️" and current_page < len(chunked_cpus) - 1:
+            current_page += 1
+        elif str(reaction.emoji) == "⬅️" and current_page > 0:
+            current_page -= 1
 
-            new_embed = discord.Embed(title="Filtered CPUs", color=discord.Color.blue())
+        new_embed = discord.Embed(title="Filtered CPUs", color=discord.Color.blue())
 
-            for cpu in chunked_cpus[current_page]:
-                new_embed.add_field(name=cpu[0], value=f"Price: £ {cpu[1]}", inline=False)
+        for cpu in chunked_cpus[current_page]:
+            new_embed.add_field(name=cpu[0], value=f"Price: £ {cpu[1]}", inline=False)
 
-            await message.edit(embed=new_embed)
+        await message.edit(embed=new_embed)
 
-        except asyncio.TimeoutError:
-            await message.clear_reactions()
-            break
+    bot.add_listener(on_reaction, 'on_reaction_add')
 
+    try:
+        await bot.wait_for('reaction_add', timeout=600, check=check)
+    except asyncio.TimeoutError:
+        await message.clear_reactions()
+
+    await ctx.send("What CPU from this list do you want to choose?")
 
         
 
 # Command to filter CPUs
+# @bot.command()
+# async def filter(ctx):
+#     min_price, max_price, brand, core_speed = await ask_for_preferences(ctx)
+#     cpus = query_cpus((min_price, max_price), brand, core_speed)
+
+#     if cpus:
+#         await display_cpu_results(ctx, cpus)
+#     else:
+#         await ctx.send("No CPUs found matching the specified criteria.")
+#     cpuChosen = getCpuPreferrence(ctx)
+#     cpuIsInList = False
+#     for cpu in cpus:
+#         if cpu == cpuChosen:
+#             cpuIsInList = True
+#             break
+#     if cpuIsInList == True:
+#         await ctx.send(f"You have chosen {cpuChosen}")
+#     else:
+#         await ctx.send("This cpu is not in the list.")
+
+    
+# async def getCpuPreferrence(ctx):
+#     await ctx.send("What cpu from this list do you want to choose?")
+#     cpu_preferred_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
+#     return cpu_preferred_msg
+
 @bot.command()
 async def filter(ctx):
     min_price, max_price, brand, core_speed = await ask_for_preferences(ctx)
@@ -154,8 +184,32 @@ async def filter(ctx):
 
     if cpus:
         await display_cpu_results(ctx, cpus)
+        cpu_chosen = await get_cpu_preference(ctx, cpus)  # Call the function to get CPU preference
+        if cpu_chosen:
+            await ctx.send(f"You have chosen {cpu_chosen}")
+        
+            
     else:
         await ctx.send("No CPUs found matching the specified criteria.")
+
+async def get_cpu_preference(ctx, cpus):
+    print("Inside get_cpu_preference function")  # Add this line to indicate that the function is being executed
+    while True:
+        await ctx.send("What CPU from this list do you want to choose?")
+        cpu_preferred_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
+        cpu_name = cpu_preferred_msg.content.strip()  # Get the content of the message
+        print("Received CPU name input:", cpu_name)  # Add this line to print the received CPU name
+        for cpu in cpus:
+            if cpu_name == cpu[0]:  # Check if the CPU name matches any CPU in the list
+                print("CPU chosen:", cpu[0])  # Add this line to print the chosen CPU
+                return cpu[0]  # Return the CPU name if it matches
+        print("CPU not found in the list")  # Add this line to indicate that the CPU was not found
+        await ctx.send("This cpu is not in the list")
+
+
+
+
+
 
 # Command to ask user whether they want to build their own PC or get suggested one
 @bot.command(name='start')
