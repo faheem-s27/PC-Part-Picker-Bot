@@ -5,7 +5,7 @@ import discord
 import sqlite3
 from discord import app_commands
 from discord.ext import tasks, commands
-
+import asyncio
 
 intents = discord.Intents.all()
 intents.message_content = True
@@ -41,15 +41,6 @@ async def help(interaction: discord.Interaction):
     await interaction.response.send_message(f"Hey! I'm the discord bot for Thematic Project, from Faheem, Maiko, Farjana, Zakariya, Andrea, Alex, Harris\n"
                                f"I'm here to help you build a PC (coming soon)")
     
-# db = sqlite3.connect('database/cpu.db')
-# cursor = db.cursor()
-
-# cursor.execute('''SELECT name 
-#                   FROM cpu
-#                   WHERE price = 96.99; ''')
-
-# row = cursor.fetchone()
-# print(row)
 
 # Function to query CPUs based on filters
 def query_cpus(price_range, brand=None, core_clock=None, core_count=None):
@@ -70,6 +61,8 @@ def query_cpus(price_range, brand=None, core_clock=None, core_count=None):
         query += " AND core_count >= ?"
         params += (core_count,)
 
+    query += " ORDER BY price DESC"  # Sort by descending price
+
     cursor.execute(query, params)
     cpus = cursor.fetchall()
 
@@ -77,8 +70,7 @@ def query_cpus(price_range, brand=None, core_clock=None, core_count=None):
 
     return cpus
 
-# Function to interactively ask the user for preferences
-# Function to interactively ask the user for preferences
+
 async def ask_for_preferences(ctx):
     await ctx.send("What is your minimum price range?")
     min_price_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
@@ -105,7 +97,54 @@ async def ask_for_preferences(ctx):
     core_count_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
     core_count = int(core_count_msg.content) if core_count_msg.content.lower() != 'none' else None
 
-    return min_price, max_price, brand, core_clock, core_count
+    return min_price, max_price, brand, core_clock
+
+
+
+# Function to chunk a list into smaller lists
+def chunk_list(lst, n):
+    return [lst[i:i + n] for i in range(0, len(lst), n)]
+
+# Function to display CPU results with pagination
+async def display_cpu_results(ctx, cpus):
+    chunked_cpus = [cpus[i:i + 5] for i in range(0, len(cpus), 5)]
+    current_page = 0
+
+    embed = discord.Embed(title="Filtered CPUs", color=discord.Color.blue())
+
+    for cpu in chunked_cpus[current_page]:
+        embed.add_field(name=cpu[0], value=f"Price: £ {cpu[1]}", inline=False)
+
+    message = await ctx.send(embed=embed)
+    await message.add_reaction("⬅️")
+    await message.add_reaction("➡️")
+
+    def check(reaction, user):
+        return user == ctx.author and reaction.message == message and str(reaction.emoji) in ["⬅️", "➡️"]
+
+    while True:
+        try:
+            reaction, user = await bot.wait_for("reaction_add", timeout=600, check=check)
+            await message.remove_reaction(reaction, user)
+
+            if str(reaction.emoji) == "➡️" and current_page < len(chunked_cpus) - 1:
+                current_page += 1
+            elif str(reaction.emoji) == "⬅️" and current_page > 0:
+                current_page -= 1
+
+            new_embed = discord.Embed(title="Filtered CPUs", color=discord.Color.blue())
+
+            for cpu in chunked_cpus[current_page]:
+                new_embed.add_field(name=cpu[0], value=f"Price: £ {cpu[1]}", inline=False)
+
+            await message.edit(embed=new_embed)
+
+        except asyncio.TimeoutError:
+            await message.clear_reactions()
+            break
+
+
+        
 
 # Command to filter CPUs
 @bot.command()
@@ -114,31 +153,11 @@ async def filter(ctx):
     cpus = query_cpus((min_price, max_price), brand, core_speed)
 
     if cpus:
-        for cpu in cpus:
-            await ctx.send(f"Name: {cpu[0]}, Price: {cpu[1]}")
+        await display_cpu_results(ctx, cpus)
     else:
         await ctx.send("No CPUs found matching the specified criteria.")
 
-# # Command to ask user whether they want to build their own PC or get suggested one
-# @bot.command(name='start')
-# async def start(ctx):
-#     await ctx.send("Press 1 if you want to build your own PC or press 2 if you want to get suggested a PC.")
-
-#     def check(message):
-#         return message.author == ctx.author and message.content in ['1', '2']
-
-#     choice_msg = await bot.wait_for('message', check=check)
-#     choice = int(choice_msg.content)
-
-#     if choice == 1:
-#         await ctx.send("You chose to build your own PC!")
-#         # Implement the logic for building your own PC
-#     elif choice == 2:
-#         await ctx.send("You chose to get suggested a PC!")
-#         await filter.invoke(ctx)  # Run the filter command to suggest a PC
-#     else:
-#         await ctx.send("Invalid choice. Please press 1 or 2.")
-        
+# Command to ask user whether they want to build their own PC or get suggested one
 @bot.command(name='start')
 async def start(ctx):
     await ctx.send("Press 1 if you want to build your own PC or press 2 if you want to get suggested a PC.")
@@ -154,15 +173,10 @@ async def start(ctx):
         # Implement the logic for building your own PC
     elif choice == 2:
         await ctx.send("You chose to get suggested a PC!")
-        min_price, max_price, brand, core_clock, core_count = await ask_for_preferences(ctx)
-        cpus = query_cpus((min_price, max_price), brand, core_clock, core_count)
-
-        if cpus:
-            for cpu in cpus:
-                await ctx.send(f"Name: {cpu[0]}, Price: {cpu[1]}")
-        else:
-            await ctx.send("No CPUs found matching the specified criteria.")
+        await filter.invoke(ctx)  # Run the filter command to suggest a PC
     else:
         await ctx.send("Invalid choice. Please press 1 or 2.")
+        
+
 
 bot.run(TOKEN)
