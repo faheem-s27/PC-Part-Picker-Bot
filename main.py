@@ -33,10 +33,6 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-# @bot.command()
-# async def help(ctx):
-#     await ctx.send("Hey! I'm the discord bot for Thematic Project, from Faheem, Maiko, Farjana, Zakariya, Andrea, Alex, Harris")
-#     await ctx.send("I'm here to help you build a PC (coming soon)")
 @bot.tree.command(name="help")
 async def help(interaction: discord.Interaction):
     await interaction.response.send_message(f"Hey! I'm the discord bot for Thematic Project, from Faheem, Maiko, Farjana, Zakariya, Andrea, Alex, Harris\n"
@@ -109,9 +105,12 @@ def chunk_list(lst, n):
 
 
 async def display_cpu_results(ctx, cpus):
+    
+
     chunked_cpus = [cpus[i:i + 5] for i in range(0, len(cpus), 5)]
     current_page = 0
-
+    await ctx.send("Please click the ➡️ reaction to see more CPU options and to also see more dialogue to answer more questions. ")
+   
     embed = discord.Embed(title="Filtered CPUs", color=discord.Color.blue())
 
     for cpu in chunked_cpus[current_page]:
@@ -146,36 +145,10 @@ async def display_cpu_results(ctx, cpus):
     except asyncio.TimeoutError:
         await message.clear_reactions()
 
-    await ctx.send("What CPU from this list do you want to choose?")
-
-        
-
-# Command to filter CPUs
-# @bot.command()
-# async def filter(ctx):
-#     min_price, max_price, brand, core_speed = await ask_for_preferences(ctx)
-#     cpus = query_cpus((min_price, max_price), brand, core_speed)
-
-#     if cpus:
-#         await display_cpu_results(ctx, cpus)
-#     else:
-#         await ctx.send("No CPUs found matching the specified criteria.")
-#     cpuChosen = getCpuPreferrence(ctx)
-#     cpuIsInList = False
-#     for cpu in cpus:
-#         if cpu == cpuChosen:
-#             cpuIsInList = True
-#             break
-#     if cpuIsInList == True:
-#         await ctx.send(f"You have chosen {cpuChosen}")
-#     else:
-#         await ctx.send("This cpu is not in the list.")
-
     
-# async def getCpuPreferrence(ctx):
-#     await ctx.send("What cpu from this list do you want to choose?")
-#     cpu_preferred_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-#     return cpu_preferred_msg
+
+ 
+ 
 
 @bot.command()
 async def filter(ctx):
