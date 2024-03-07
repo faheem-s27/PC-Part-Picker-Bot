@@ -309,34 +309,18 @@ async def filter_motherboards(ctx):
     if motherboards:
         await display_motherboard_results(ctx, motherboards)
 
+
+
+
 #ram filtering
         #connection with ram table
 def query_ram(price, speed, color, first_word_latency, cas_latency):
-    conn = sqlite3.connect('database/cpu.db')  # Modify as needed to connect to your database
+    conn = sqlite3.connect('database/cpu.db')  # Use the correct path to your database file
     cursor = conn.cursor()
-    
-    # Adjust the query to match the RAM table and columns in your database
-    query = "SELECT name, price FROM memory_ram WHERE price <= ? AND speed <= ? AND color LIKE ? AND first_word_latency <= ? AND cas_latency <= ?"
-    params = (price, f'%{speed}%', f'%{color}%', first_word_latency, cas_latency)
-
-#     # Adjust the query to use LIKE for all fields - this is not standard for numerical fields!
-#     query = """SELECT name, price FROM memory_ram
-#             WHERE CAST(price AS TEXT) LIKE ?
-#             AND CAST(speed AS TEXT) LIKE ?
-#             AND color LIKE ?
-#             AND CAST(first_word_latency AS TEXT) LIKE ?
-#             AND CAST(cas_latency AS TEXT) LIKE ?"""
-
-# # Assuming the function calling this passes strings with wildcards for numerical values
-#     params = (
-#         f'%{price}%',  # User might input something like '2%'
-#         f'%{speed}%',  # User might input something like '240%'
-#         f'%{color}%',  # Appropriate for text, e.g. 'Red%'
-#         f'%{first_word_latency}%',  # User might input '1%'
-#         f'%{cas_latency}%'  # User might input '3%'
-#     )
-
-    
+    query = """SELECT name, price FROM memory_ram WHERE price <= ? AND speed = ? 
+               AND color LIKE ? AND first_word_latency <= ? AND cas_latency <= ?"""
+    # Note that we're assuming color is a partial match but speed is an exact match
+    params = (price, speed, f'%{color}%', first_word_latency, cas_latency)
     
     cursor.execute(query, params)
     rams = cursor.fetchall()
@@ -345,28 +329,32 @@ def query_ram(price, speed, color, first_word_latency, cas_latency):
 
     
 async def ask_for_ram_preferences(ctx):
-    # Ask the user for their RAM preferences
-    await ctx.send("What price are you looking for in a RAM?")
+    await ctx.send("What maximum price are you looking for in a RAM? (e.g., 150)")
     price_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-    price = price_msg.content
+    price = float(price_msg.content)  # Convert to float
+    
 
-    await ctx.send("What speed are you looking for?")
+    await ctx.send("What minimum speed (in MHz) are you looking for? (e.g., 3200)")
     speed_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-    speed = speed_msg.content
+    speed = int(speed_msg.content)
+    
 
     await ctx.send("What color are you looking for?")
     color_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-    color = color_msg.content
+    color = color_msg.content  # Keep as string
 
-    await ctx.send("How much first word latency are you looking for?")
+    await ctx.send("What maximum first word latency are you looking for? (e.g., 19)")
     fwl_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-    first_word_latency = fwl_msg.content
+    first_word_latency = int(fwl_msg.content)  # Convert to int
+    
 
-    await ctx.send("How much CAS latency are you looking for?")
+    await ctx.send("What maximum CAS latency are you looking for? (e.g., 16)")
     cas_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-    cas_latency = cas_msg.content
+    cas_latency = int(cas_msg.content)  # Convert to int
+    
 
-    return price, speed, color, first_word_latency, cas_latency
+    return  price, speed, color, first_word_latency,cas_latency
+
     
 
 async def display_ram_results(ctx, rams):
@@ -384,32 +372,35 @@ async def display_ram_results(ctx, rams):
     await message.add_reaction("➡️")
 
     def check(reaction, user):
-        return user == ctx.author and str(reaction.emoji) in ["⬅️", "➡️"]
+        
+        return user == ctx.author and reaction.message == message and str(reaction.emoji) in ["⬅️", "➡️"]
 
-    while True:
+
+    async def on_reaction(reaction, user):
+        nonlocal current_page
+        
+
+        if str(reaction.emoji) == "➡️" and current_page < len(chunked_rams) - 1:
+            current_page += 1
+        elif str(reaction.emoji) == "⬅️" and current_page > 0:
+            current_page -= 1
+
+        # Update the embed with the new page of RAM results
+        new_embed = discord.Embed(title="Filtered RAMs", color=discord.Color.blue())
+        for ram in chunked_rams[current_page]:
+            new_embed.add_field(name=ram[0], value=f"Price: £{ram[1]}", inline=False)
+
+        await message.edit(embed=new_embed)
+          
+
+        bot.add_listener(on_reaction, 'on_reaction_add')
+
         try:
-            reaction, user = await bot.wait_for('reaction_add', timeout=600, check=check)
-
-            if str(reaction.emoji) == "➡️" and current_page < len(chunked_rams) - 1:
-                current_page += 1
-            elif str(reaction.emoji) == "⬅️" and current_page > 0:
-                current_page -= 1
-
-            # Update the embed with the new page of RAM results
-            new_embed = discord.Embed(title="Filtered RAMs", color=discord.Color.blue())
-            for ram in chunked_rams[current_page]:
-                new_embed.add_field(name=ram[0], value=f"Price: £{ram[1]}", inline=False)
-
-            await message.edit(embed=new_embed)
-            await message.remove_reaction(reaction, user)
-            
+            await bot.wait_for('reaction_add', timeout=600, check=check)
         except asyncio.TimeoutError:
-            break  # End the loop if no reaction within the timeout period
+            await message.clear_reactions()
 
-    await message.clear_reactions()
-
-
-@bot.command()
+@bot.command(name='filter_ram')
 async def filter_ram(ctx):
     price, speed, color, first_word_latency, cas_latency = await ask_for_ram_preferences(ctx)
     
@@ -417,10 +408,11 @@ async def filter_ram(ctx):
     # Convert string inputs to the appropriate numeric types if needed
     try:
         price = float(price)
+        speed = int(speed)  # Assuming speed is also an integer value like MHz
         first_word_latency = int(first_word_latency)
         cas_latency = int(cas_latency)
-    except ValueError:
-        await ctx.send("Please make sure to enter numbers for price, first word latency, and CAS latency.")
+    except ValueError as e:
+        await ctx.send(f"An error occurred with the input: {e}. Please make sure to enter numbers for price, speed, first word latency, and CAS latency.")
         return
 
     rams = query_ram(price, speed, color, first_word_latency, cas_latency)
@@ -435,7 +427,7 @@ def filter_cpus_by_name(name):
     # Connect to the database and query for CPUs by name
     conn = sqlite3.connect('database/cpu.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT name FROM cpu WHERE name LIKE ?", ('%' + name + '%',))
+    cursor.execute("SELECT name FROM cpu WHERE name = ?", (name,))
     cpus = cursor.fetchall()
     conn.close()
     return cpus
@@ -444,7 +436,7 @@ def filter_motherboards_by_name(name):
     # Connect to the database and query for motherboards by name
     conn = sqlite3.connect('database/cpu.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT name FROM motherboard WHERE name LIKE ?", ('%' + name + '%',))
+    cursor.execute("SELECT name FROM motherboard WHERE name = ?", (name,))
     motherboards = cursor.fetchall()
     conn.close()
     return motherboards
@@ -453,7 +445,7 @@ def filter_rams_by_name(name):
     conn = sqlite3.connect('database/cpu.db')  # Modify as needed to connect to your database
     cursor = conn.cursor()
     # Use "LIKE" operator for fields where partial matches are acceptable
-    cursor.execute("SELECT name FROM memory_ram WHERE name LIKE ?", ('%' + name + '%',))
+    cursor.execute("SELECT name FROM memory_ram WHERE name = ?", (name,))
     rams = cursor.fetchall()
     conn.close()
     return rams
