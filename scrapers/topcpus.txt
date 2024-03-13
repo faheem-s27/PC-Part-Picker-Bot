@@ -1,0 +1,76 @@
+import discord
+from discord.ext import commands
+import requests
+from bs4 import BeautifulSoup
+
+intents = discord.Intents.all()
+intents.message_content: bool = True
+intents.members = True
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+@bot.event
+async def on_ready():
+    print(f'We have logged in as {bot.user}')
+
+@bot.command(name='topcpus')
+async def display_top_cpus(ctx):
+    cpu_data = scrape_top_cpus()
+    await ctx.send(cpu_data)
+
+def scrape_top_cpus():
+    url = 'https://www.amazon.com/s?k=cpu'
+# scrape the title, price and ratings of cpus on amazon
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        cpu_items = soup.find_all('div', class_='s-result-item')
+
+        cpu_data = []
+        for item in cpu_items:
+            title_tag = item.find('h2')
+            if title_tag:
+                title = title_tag.get_text(strip=True)
+                price_tag = item.find('span', class_='a-offscreen')
+                if price_tag:
+                    price = price_tag.get_text(strip=True)
+                    rating_tag = item.find('span', class_='a-size-base s-underline-text')
+                    if rating_tag:
+                        rating = rating_tag.get_text(strip=True)
+                        cpu_data.append({
+                            'title': title,
+                            'price': price,
+                            'rating': rating
+                        })
+
+        return format_cpu_data(cpu_data)
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        return "Error fetching data."
+
+def format_cpu_data(cpu_data):
+    formatted_data = "Top Rated CPUs on Amazon:\n"
+    max_chars = 1500
+
+    # filter out cpus with missing information or non-CPU items
+    valid_cpus = [cpu for cpu in cpu_data if all(cpu[key] != 'Title not available' for key in cpu) and 'cpu' in cpu['title'].lower()]
+
+    # filter out cpus without a valid numeric rating
+    valid_cpus = [cpu for cpu in valid_cpus if 'Rating' not in cpu.get('rating', '')]
+
+    # sort cpus by the number of 5-star ratings in descending order
+    sorted_cpus = sorted(valid_cpus, key=lambda x: float(x.get('rating', '0').split()[0]) if 'Rating' in x.get('rating', '') and '5.0' in x.get('rating', '') else 0, reverse=True)
+
+    for cpu in sorted_cpus:
+        cpu_info = f"Title: {cpu['title']}, Price: {cpu['price']}, Rating: {cpu['rating']}\n"
+        if len(formatted_data) + len(cpu_info) <= max_chars:
+            formatted_data += cpu_info
+        else:
+            break
+
+    return formatted_data
+
+
+bot.run('TOKEN')
