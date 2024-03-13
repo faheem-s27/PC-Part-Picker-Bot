@@ -38,4 +38,4 @@ async def get_price(ctx, *, product):
     else:
         await ctx.send('Failed to fetch data from Amazon.')
 
-bot.run('token')
+bot.run('MTIxMjA1NjA0NzIzNDMyMjQ5Mg.G1tIwh.2VbYZJOLz2KyoJ1Us3F6JWrcU6Wl4erWmvC3eo')
