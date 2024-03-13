@@ -32,7 +32,7 @@ def scrape_top_cpus():
             title_tag = item.find('h2')
             if title_tag:
                 title = title_tag.get_text(strip=True)
-                price_tag = item.find('span', class_='a-offscreen')
+                price_tag = item.find('span', class_='a-price-whole')
                 if price_tag:
                     price = price_tag.get_text(strip=True)
                     rating_tag = item.find('span', class_='a-size-base s-underline-text')
