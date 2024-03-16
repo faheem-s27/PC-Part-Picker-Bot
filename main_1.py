@@ -180,13 +180,18 @@ async def add_component(ctx, *, component_name: str):
         price_info, image_link, search_url_info = scrape_ebay(cpu_chosen)
 
         embed = discord.Embed(title="Component Added", description=f"You have chosen the CPU: {cpu_chosen}.")
-        embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}\n{image_link}")
+        embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}")
+
+        # print(image_link)
+        # embed.set_image(url=image_link)
+        embed.set_thumbnail(url=image_link)
 
         await ctx.send(embed=embed)
         return
 
     embed = discord.Embed(title="Component Not Found", description="No component found matching this criteria.")
     await ctx.send(embed=embed)
+
 
 # Command to initiate CPU filtering process
 @bot.command(name='cpu')
