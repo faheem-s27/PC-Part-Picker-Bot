@@ -1,6 +1,7 @@
 import discord
 import sqlite3
 import asyncio
+import os
 
 
 # Function to query CPUs based on filters for the CPU database
@@ -19,7 +20,7 @@ def query_cpus(price_range, brand=None, core_clock=None, core_count=None):
         query += " AND core_count >= ?"
         params += (core_count,)
 
-    query += " ORDER BY price DESC"  
+    query += " ORDER BY price DESC"
     cursor.execute(query, params)
     cpus = cursor.fetchall()
     conn.close()
@@ -87,6 +88,7 @@ async def display_cpu_results(bot, ctx):  # Modified to accept bot object as an 
 
     if not cpus:
         await ctx.send("No CPUs found matching the specified criteria.")
+        print("not working)")
         return
 
     # Sort the CPUs by price (descending)
@@ -95,6 +97,7 @@ async def display_cpu_results(bot, ctx):  # Modified to accept bot object as an 
     # Count the number of CPUs that fit the filtering criteria
     num_cpus = len(cpus)
     await ctx.send(f"Found {num_cpus} CPU(s) matching the specified criteria.")
+    print("working3")
 
     chunked_cpus = [cpus[i:i + 5] for i in range(0, len(cpus), 5)]
     current_page = 0
