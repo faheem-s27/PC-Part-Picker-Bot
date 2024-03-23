@@ -127,7 +127,54 @@ def find_similar_components(component_type):
     else:
         return []
 
+# Define the pre-built PCs specifications
+prebuilt_pcs = {
+    "General Desktop PC": {
+        "CPU": "Intel Core i5-11400F 2.6GHz 6-Core",
+        "Cooling System": "Assassin 120 SE 66 CFM",
+        "Motherboard": "H510M K V2",
+        "RAM": "16GB(2 x 8GB) DDR4-3200",
+        "Storage": "512GB NVMe SSD",
+        "GPU": "GeForce GTX 1650",
+        "Case": "4000D Mid Tower",
+        "Power Supply":"RM750e 750W",
+        "Price": "£750",
+        "PcPartPicker link": "https://uk.pcpartpicker.com/list/tPDdWt"
+    },
+    "Gaming PC": {
+        "CPU": "AMD Ryzen 5 5600X 3.7GHz 6-Core",
+        "Cooling System": "iCUE H100i RGB ELITE 59 CFM",
+        "Motherboard": "ASUS TUF GAMING B550-PLUS",
+        "RAM": "16GB(2 x 8GB) DDR4 3600MHz",
+        "Storage": "1TB NVMe SSD",
+        "GPU": "GeForce RTX 3060 Ti",
+        "Case": "Meshify C Mid Tower",
+        "Power Supply":"RM850e 850W",
+        "Price": "£1300",
+        "PcPartPicker link": "https://uk.pcpartpicker.com/list/CnBpn6"
+    },
+    "High Performance PC": {
+        "CPU": "Intel Core i9-14900KF 3.2GHz 24-Core",
+        "Cooling System": "Kraken Elite 78 CFM",
+        "Motherboard": "MSI PRO Z790-A MAX WIFI",
+        "RAM": "32GB(2 x 16GB) DDR5 5200MHz",
+        "Storage": "2TB M.2 PCle NVMe SSD",
+        "GPU": "GeForce RTX 4090",
+        "Case": "Lian Li O11 Mid Tower",
+        "Power Supply":"V850 SFX COLD 850W",
+        "Price": "£3450",
+        "PcPartPicker link": "https://uk.pcpartpicker.com/list/kJhN7R"
+    }
+}
 
+@bot.command(name='pre-built')
+async def prebuilt_pc(ctx):
+    for pc_name, specs in prebuilt_pcs.items():
+        embed = discord.Embed(title=pc_name, description="Considering your budget and needs, you can have a look at the specifications below:")
 
+        components = "\n".join([f"**{component}:** {value}" for component, value in specs.items()])
+        embed.add_field(name="Specifications", value=components, inline=False)
+
+        await ctx.send(embed=embed)
 
 bot.run(TOKEN) 
