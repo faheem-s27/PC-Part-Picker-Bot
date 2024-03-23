@@ -1,0 +1,84 @@
+[
+    {
+        "Technology": "GSM / CDMA / HSPA / EVDO / LTE / 5G",
+        "2G bands": "GSM 850 / 900 / 1800 / 1900 - SIM 1 & SIM 2 (dual-SIM)",
+        "\u00a0": "1, 2, 3, 5, 7, 8, 12, 20, 25, 26, 28, 30, 38, 40, 41, 48, 66, 70, 77, 78, 79 SA/NSA/Sub6 - A3092",
+        "3G bands": "HSDPA 850 / 900 / 1700(AWS) / 1900 / 2100 ",
+        "4G bands": "1, 2, 3, 4, 5, 7, 8, 12, 13, 17, 18, 19, 20, 25, 26, 28, 30, 32, 34, 38, 39, 40, 41, 42, 46, 48, 53, 66 - A3090",
+        "5G bands": "1, 2, 3, 5, 7, 8, 12, 20, 25, 26, 28, 30, 38, 40, 41, 48, 53, 66, 70, 77, 78, 79 SA/NSA/Sub6 - A3090",
+        "Speed": "HSPA, LTE, 5G, EV-DO Rev.A 3.1 Mbps"
+    },
+    {
+        "Announced": "2023, September 12",
+        "Status": "Available. Released 2023, September 22"
+    },
+    {
+        "Dimensions": "147.6 x 71.6 x 7.8 mm (5.81 x 2.82 x 0.31 in)",
+        "Weight": "171 g (6.03 oz)",
+        "Build": "Glass front (Corning-made glass), glass back (Corning-made glass), aluminum frame",
+        "SIM": "Nano-SIM and eSIM - International Dual eSIM with multiple numbers - USA Dual SIM (Nano-SIM, dual stand-by) - China",
+        "\u00a0": "IP68 dust/water resistant (up to 6m for 30 min)\r\nApple Pay (Visa, MasterCard, AMEX certified)"
+    },
+    {
+        "Type": "Super Retina XDR OLED, HDR10, Dolby Vision, 1000 nits (HBM), 2000 nits (peak)",
+        "Size": "6.1 inches, 91.3 cm2 (~86.4% screen-to-body ratio)",
+        "Resolution": "1179 x 2556 pixels, 19.5:9 ratio (~461 ppi density)",
+        "Protection": "Ceramic Shield glass"
+    },
+    {
+        "OS": "iOS 17, upgradable to iOS 17.4",
+        "Chipset": "Apple A16 Bionic (4 nm)",
+        "CPU": "Hexa-core (2x3.46 GHz Everest + 4x2.02 GHz Sawtooth)",
+        "GPU": "Apple GPU (5-core graphics)"
+    },
+    {
+        "Card slot": "No",
+        "Internal": "128GB 6GB RAM, 256GB 6GB RAM, 512GB 6GB RAM",
+        "\u00a0": "NVMe"
+    },
+    {
+        "Dual": "48 MP, f/1.6, 26mm (wide), 1/1.56\", 1.0\u00b5m, dual pixel PDAF, sensor-shift OIS\r\n12 MP, f/2.4, 13mm, 120\u02da (ultrawide)",
+        "Features": "Dual-LED dual-tone flash, HDR (photo/panorama)",
+        "Video": "4K@24/25/30/60fps, 1080p@25/30/60/120/240fps, HDR, Dolby Vision HDR (up to 60fps), Cinematic mode (4K@30fps), stereo sound rec."
+    },
+    {
+        "Single": "12 MP, f/1.9, 23mm (wide), 1/3.6\", PDAF\r\nSL 3D, (depth/biometrics sensor)",
+        "Features": "HDR, Cinematic mode (4K@30fps)",
+        "Video": "4K@24/25/30/60fps, 1080p@25/30/60/120fps, gyro-EIS"
+    },
+    {
+        "Loudspeaker ": "Yes, with stereo speakers",
+        "3.5mm jack ": "No"
+    },
+    {
+        "WLAN": "Wi-Fi 802.11 a/b/g/n/ac/6, dual-band, hotspot",
+        "Bluetooth": "5.3, A2DP, LE",
+        "Positioning": "GPS, GLONASS, GALILEO, BDS, QZSS",
+        "NFC": "Yes",
+        "Radio": "No",
+        "USB": "USB Type-C 2.0, DisplayPort"
+    },
+    {
+        "Sensors": "Face ID, accelerometer, gyro, proximity, compass, barometer",
+        "\u00a0": "Ultra Wideband 2 (UWB) support\r\nEmergency SOS via satellite (SMS sending/receiving)"
+    },
+    {
+        "Type": "Li-Ion 3349 mAh, non-removable",
+        "Charging": "Wired, PD2.0, 50% in 30 min (advertised)\r\n15W wireless (MagSafe)\r\n15W wireless (Qi2) - requires iOS 17.2 update\r\n4.5W reverse wired"
+    },
+    {
+        "Colors": "Black, Blue, Green, Yellow, Pink",
+        "Models": "A3090, A2846, A3089, A3092, iPhone15,4",
+        "SAR": "1.12 W/kg (head) \u00a0 \u00a0 1.14 W/kg (body) \u00a0 \u00a0 ",
+        "SAR EU": "0.98 W/kg (head) \u00a0 \u00a0 0.98 W/kg (body) \u00a0 \u00a0 ",
+        "Price": "\u00a3\u2009649.97 / \u20ac\u2009753.81 / $\u2009664.13"
+    },
+    {
+        "Performance": "\r\nAnTuTu: 1354651 (v10)\r\nGeekBench: 6526 (v6)\r\nGFXBench: 60fps (ES 3.1 onscreen)",
+        "Display": "\nContrast ratio: Infinite (nominal)",
+        "Camera": "\nPhoto / Video",
+        "Loudspeaker": "\n-26.2 LUFS (Good)\n",
+        "Battery (new)": "\n\nActive use score 13:20h\n\n",
+        "Battery (old)": "\n\nEndurance rating 98h\n\n"
+    }
+]
