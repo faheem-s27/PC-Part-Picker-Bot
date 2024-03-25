@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from cpu_commands import filter_cpus_by_name, display_cpu_results
+from gpu_commands import filter_gpus_by_name, display_gpu_results
 from ebay import scrape_ebay
 
 intents = discord.Intents.all()
@@ -47,6 +48,12 @@ async def cpu_filter(ctx):
     await ctx.send("You will get asked a range of questions for us to filter the CPUs for your desired results.")
     await display_cpu_results(bot, ctx)
 
+# Command to initiate GPU filtering process
+@bot.command(name='gpu')
+async def cpu_filter(ctx):
+    await ctx.send("You will get asked a range of questions for us to filter the GPUs for your desired results.")
+    await display_gpu_results(bot, ctx)
+
 @bot.command(name='add')
 async def add_component(ctx, *, component_name: str):
     cpus = filter_cpus_by_name(component_name)
@@ -64,6 +71,21 @@ async def add_component(ctx, *, component_name: str):
         await ctx.send(embed=embed)
         return
 
+    gpus = filter_gpus_by_name(component_name)
+    if gpus:
+        gpu_chosen = gpus[0][0]
+        price_info, image_link, search_url_info = scrape_ebay(gpu_chosen)
+
+        user_id = ctx.author.id
+        added_components.setdefault(user_id, []).append(gpu_chosen)
+
+        embed = discord.Embed(title="Component Added", description=f"You have chosen the GPU: {gpu_chosen}.")
+        embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}")
+        embed.set_thumbnail(url=image_link)
+
+        await ctx.send(embed=embed)
+        return
+    
     embed = discord.Embed(title="Component Not Found", description="No component found matching this criteria.")
     await ctx.send(embed=embed)
 
