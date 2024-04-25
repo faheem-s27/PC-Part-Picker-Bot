@@ -5,6 +5,7 @@ from discord.ext import commands
 
 from cpu_commands import filter_cpus_by_name, display_cpu_results
 from gpu_commands import filter_gpus_by_name, display_gpu_results
+from case_commands import filter_cases_by_name, display_case_results
 from ebay import scrape_ebay
 
 intents = discord.Intents.all()
@@ -54,6 +55,12 @@ async def cpu_filter(ctx):
     await ctx.send("You will get asked a range of questions for us to filter the GPUs for your desired results.")
     await display_gpu_results(bot, ctx)
 
+# Command to initiate Case filtering process
+@bot.command(name='case')
+async def cpu_filter(ctx):
+    await ctx.send("You will get asked a range of questions for us to filter the cases for your desired results.")
+    await display_case_results(bot, ctx)
+
 @bot.command(name='add')
 async def add_component(ctx, *, component_name: str):
     cpus = filter_cpus_by_name(component_name)
@@ -80,6 +87,21 @@ async def add_component(ctx, *, component_name: str):
         added_components.setdefault(user_id, []).append(gpu_chosen)
 
         embed = discord.Embed(title="Component Added", description=f"You have chosen the GPU: {gpu_chosen}.")
+        embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}")
+        embed.set_thumbnail(url=image_link)
+
+        await ctx.send(embed=embed)
+        return
+    
+    cases = filter_cases_by_name(component_name)
+    if cases:
+        case_chosen = cases[0][0]
+        price_info, image_link, search_url_info = scrape_ebay(case_chosen)
+
+        user_id = ctx.author.id
+        added_components.setdefault(user_id, []).append(case_chosen)
+
+        embed = discord.Embed(title="Component Added", description=f"You have chosen the Case: {case_chosen}.")
         embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}")
         embed.set_thumbnail(url=image_link)
 
