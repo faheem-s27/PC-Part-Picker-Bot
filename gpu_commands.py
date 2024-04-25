@@ -103,7 +103,7 @@ async def display_gpu_results(bot, ctx):  # Modified to accept bot object as an 
     # Count the number of GPUs that fit the filtering criteria
     num_gpus = len(gpus)
     await ctx.send(f"Found {num_gpus} GPU(s) matching the specified criteria.")
-    print("working3")
+    print("working")
 
     chunked_gpus = [gpus[i:i + 5] for i in range(0, len(gpus), 5)]
     current_page = 0
