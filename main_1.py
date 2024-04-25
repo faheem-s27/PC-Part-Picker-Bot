@@ -6,6 +6,7 @@ from discord.ext import commands
 from cpu_commands import filter_cpus_by_name, display_cpu_results
 from gpu_commands import filter_gpus_by_name, display_gpu_results
 from case_commands import filter_cases_by_name, display_case_results
+from caseFan_commands import filter_caseFans_by_name, display_caseFan_results
 from ebay import scrape_ebay
 
 intents = discord.Intents.all()
@@ -61,6 +62,11 @@ async def cpu_filter(ctx):
     await ctx.send("You will get asked a range of questions for us to filter the cases for your desired results.")
     await display_case_results(bot, ctx)
 
+@bot.command(name='caseFan')
+async def cpu_filter(ctx):
+    await ctx.send("You will get asked a range of questions for us to filter the case fans for your desired results.")
+    await display_caseFan_results(bot, ctx)
+
 @bot.command(name='add')
 async def add_component(ctx, *, component_name: str):
     cpus = filter_cpus_by_name(component_name)
@@ -77,7 +83,6 @@ async def add_component(ctx, *, component_name: str):
 
         await ctx.send(embed=embed)
         return
-
     gpus = filter_gpus_by_name(component_name)
     if gpus:
         gpu_chosen = gpus[0][0]
@@ -91,8 +96,7 @@ async def add_component(ctx, *, component_name: str):
         embed.set_thumbnail(url=image_link)
 
         await ctx.send(embed=embed)
-        return
-    
+        return    
     cases = filter_cases_by_name(component_name)
     if cases:
         case_chosen = cases[0][0]
@@ -102,6 +106,19 @@ async def add_component(ctx, *, component_name: str):
         added_components.setdefault(user_id, []).append(case_chosen)
 
         embed = discord.Embed(title="Component Added", description=f"You have chosen the Case: {case_chosen}.")
+        embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}")
+        embed.set_thumbnail(url=image_link)
+
+        await ctx.send(embed=embed)
+        return
+    caseFans = filter_caseFans_by_name(component_name)
+    if caseFans:
+        caseFan_chosen = caseFans[0][0]
+        price_info, image_link, search_url_info = scrape_ebay(caseFan_chosen)
+        user_id = ctx.author.id
+        added_components.setdefault(user_id, []).append(caseFan_chosen)
+
+        embed = discord.Embed(title="Component Added", description=f"You have chosen the Case Fan: {caseFan_chosen}.")
         embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}")
         embed.set_thumbnail(url=image_link)
 
