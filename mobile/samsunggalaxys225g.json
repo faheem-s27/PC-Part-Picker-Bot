@@ -1,0 +1,85 @@
+[
+    {
+        "Technology": "GSM / CDMA / HSPA / EVDO / LTE / 5G",
+        "2G bands": "GSM 850 / 900 / 1800 / 1900 - SIM 1 & SIM 2 (Dual SIM model only)",
+        "\u00a0": "1, 3, 5, 7, 8, 20, 28, 38, 41, 66, 71, 260, 261 SA/NSA/Sub6/mmWave - USA",
+        "3G bands": "HSDPA 850 / 900 / 1700(AWS) / 1900 / 2100 ",
+        "4G bands": "1, 2, 3, 4, 5, 7, 8, 12, 13, 17, 18, 19, 20, 25, 26, 28, 32, 38, 39, 40, 41, 66 - International",
+        "5G bands": "1, 2, 3, 5, 7, 8, 12, 20, 25, 28, 38, 40, 41, 66, 75, 77, 78 SA/NSA/Sub6 - International",
+        "Speed": "HSPA 42.2/5.76 Mbps, LTE (7CA) Cat20 2000/200 Mbps, 5G (5+ Gbps DL)"
+    },
+    {
+        "Announced": "2022, February 09",
+        "Status": "Available. Released 2022, February 25"
+    },
+    {
+        "Dimensions": "146 x 70.6 x 7.6 mm (5.75 x 2.78 x 0.30 in)",
+        "Weight": "167 g / 168 g (mmWave) (5.89 oz)",
+        "Build": "Glass front (Gorilla Glass Victus+), glass back (Gorilla Glass Victus+), aluminum frame",
+        "SIM": "Nano-SIM and eSIM or Dual SIM (2 Nano-SIMs and eSIM, dual stand-by)",
+        "\u00a0": "IP68 dust/water resistant (up to 1.5m for 30 min)\r\nArmor aluminum frame with tougher drop and scratch resistance (advertised)"
+    },
+    {
+        "Type": "Dynamic AMOLED 2X, 120Hz, HDR10+, 1300 nits (peak)",
+        "Size": "6.1 inches, 90.1 cm2 (~87.4% screen-to-body ratio)",
+        "Resolution": "1080 x 2340 pixels, 19.5:9 ratio (~425 ppi density)",
+        "Protection": "Corning Gorilla Glass Victus+",
+        "\u00a0": "Always-on display"
+    },
+    {
+        "OS": "Android 12, upgradable to Android 14, One UI 6",
+        "Chipset": "Exynos 2200 (4 nm) - EuropeQualcomm SM8450 Snapdragon 8 Gen 1 (4 nm) - ROW",
+        "CPU": "Octa-core (1x2.8 GHz Cortex-X2 & 3x2.50 GHz Cortex-A710 & 4x1.8 GHz Cortex-A510) - EuropeOcta-core (1x3.00 GHz Cortex-X2 & 3x2.50 GHz Cortex-A710 & 4x1.80 GHz Cortex-A510) - ROW",
+        "GPU": "Xclipse 920 - EuropeAdreno 730 - ROW"
+    },
+    {
+        "Card slot": "No",
+        "Internal": "128GB 8GB RAM, 256GB 8GB RAM",
+        "\u00a0": "UFS 3.1"
+    },
+    {
+        "Triple": "50 MP, f/1.8, 23mm (wide), 1/1.56\", 1.0\u00b5m, dual pixel PDAF, OIS\r\n10 MP, f/2.4, 70mm (telephoto), 1/3.94\", 1.0\u00b5m, PDAF, OIS, 3x optical zoom\r\n12 MP, f/2.2, 13mm, 120\u02da (ultrawide), 1/2.55\" 1.4\u00b5m, Super Steady video",
+        "Features": "LED flash, auto-HDR, panorama",
+        "Video": "8K@24fps, 4K@30/60fps, 1080p@30/60/240fps, 720p@960fps, HDR10+, stereo sound rec., gyro-EIS"
+    },
+    {
+        "Single": "10 MP, f/2.2, 26mm (wide), 1/3.24\", 1.22\u00b5m, dual pixel PDAF",
+        "Features": "Dual video call, Auto-HDR",
+        "Video": "4K@30/60fps, 1080p@30fps"
+    },
+    {
+        "Loudspeaker ": "Yes, with stereo speakers",
+        "3.5mm jack ": "No",
+        "\u00a0": "32-bit/384kHz audio\r\nTuned by AKG"
+    },
+    {
+        "WLAN": "Wi-Fi 802.11 a/b/g/n/ac/6, dual-band, Wi-Fi Direct",
+        "Bluetooth": "5.2, A2DP, LE",
+        "Positioning": "GPS, GLONASS, BDS, GALILEO",
+        "NFC": "Yes",
+        "Radio": "No",
+        "USB": "USB Type-C 3.2, OTG"
+    },
+    {
+        "Sensors": "Fingerprint (under display, ultrasonic), accelerometer, gyro, proximity, compass, barometer",
+        "\u00a0": "Samsung DeX, Samsung Wireless DeX (desktop experience support)"
+    },
+    {
+        "Type": "Li-Ion 3700 mAh, non-removable",
+        "Charging": "25W wired, PD3.0\r\n15W wireless (Qi/PMA)\r\n4.5W reverse wireless"
+    },
+    {
+        "Colors": "Phantom Black, White, Pink Gold, Green, Graphite, Sky Blue, Violet, Cream, Bora Purple",
+        "Models": "SM-S901B, SM-S901B/DS, SM-S901U, SM-S901U1, SM-S901W, SM-S901N, SM-S9010, SM-S901E, SM-S901E/DS",
+        "SAR": "1.03 W/kg (head) \u00a0 \u00a0 1.15 W/kg (body) \u00a0 \u00a0 ",
+        "SAR EU": "1.21 W/kg (head) \u00a0 \u00a0 1.59 W/kg (body) \u00a0 \u00a0 ",
+        "Price": "\u00a3\u2009249.97 / \u20ac\u2009395.85 / $\u2009288.94 / C$\u2009449.86"
+    },
+    {
+        "Performance": "\r\nAnTuTu: 745496 (v8), 881428 (v9)\r\nGeekBench: 3682 (v5.1)\r\nGFXBench: 69fps (ES 3.1 onscreen)",
+        "Display": "\nContrast ratio: Infinite (nominal)",
+        "Camera": "\nPhoto / Video",
+        "Loudspeaker": "\n-26.4 LUFS (Good)\n",
+        "Battery (old)": "\n\nEndurance rating 85h\n\n"
+    }
+]

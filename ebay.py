@@ -42,7 +42,7 @@ def scrape_ebay(item):
             # Extract image links from the second item
             image_links = extract_image_links(first_item)
             if price:
-                return f'The price of {item} on eBay UK is {price}', f'Image links: {", ".join(image_links)}', f'eBay search URL: {search_url}'
+                return f'The price of {item} on eBay UK is {price}', f'{", ".join(image_links)}', f'eBay search URL: {search_url}'
             else:
                 return 'Price not found.', f'Image links: {", ".join(image_links)}', f'eBay search URL: {search_url}'
         else:
@@ -51,8 +51,8 @@ def scrape_ebay(item):
         # Handle request exceptions and return error message along with eBay search URL
         return f'Failed to fetch data from eBay: {e}', None, f'eBay search URL: {search_url}'
 
-# Example usage: Intel Core i7-950, Intel Core i5-8500T, Intel Core i5-2500, AMD Ryzen 7 5800X
-cpu_model = "Intel Core i5-8500T"
-price_info, image_links_info, search_url_info = scrape_ebay(cpu_model)
-sep = "-" * 100
-print(f"{sep}\n{search_url_info}\n{price_info}\n{image_links_info}\n{sep}")
+# # Example usage: Intel Core i7-950, Intel Core i5-8500T, Intel Core i5-2500, AMD Ryzen 7 5800X
+# cpu_model = "AMD A12-9800"
+# price_info, image_links_info, search_url_info = scrape_ebay(cpu_model)
+# sep = "-" * 100
+# print(f"{sep}\n{search_url_info}\n{price_info}\n{image_links_info}\n{sep}")

@@ -1,15 +1,23 @@
 TOKEN = 'MTIxMDE3MzY5NzA5NzMzNDg0NQ.GwXM-Z.L-Hy_1N7FVzJTWrlgWaz5nhIXCgz-rlUtybVCI'
 
 import discord
-import sqlite3
-from discord.ext import tasks, commands
-import asyncio
+from discord.ext import commands
+
+from cpu_commands import filter_cpus_by_name, display_cpu_results
+from gpu_commands import filter_gpus_by_name, display_gpu_results
+from case_commands import filter_cases_by_name, display_case_results
+from caseFan_commands import filter_caseFans_by_name, display_caseFan_results
+from ebay import scrape_ebay
 
 intents = discord.Intents.all()
 intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+
+added_components = {}
+
+# Duck was here
 
 @bot.event
 async def on_ready():
@@ -22,140 +30,214 @@ async def on_ready():
         # Print any errors encountered during syncing
         print(e)
 
+# In case of error or wrong command
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        embed = discord.Embed(title="Error", description="Sorry, I couldn't find that command. Type /help for a list of available commands.")
+        await ctx.send(embed=embed)
+
 # Provide helpful information when the user triggers the "help" command
 @bot.tree.command(name="help")
 async def help(interaction: discord.Interaction):
-    await interaction.response.send_message(f"Hey there! I'm here to help you build a PC."
-                                            f"\nYou can use commands like:"
-                                            f"\n!cpu to find CPUs"
-                                            f"\n!add to add components to the build.")
-
-# Function to query CPUs based on filters for the CPU database
-def query_cpus(price_range, brand=None, core_clock=None, core_count=None):
-    conn = sqlite3.connect('database/cpu.db')
-    cursor = conn.cursor()
-
-    query = "SELECT name, price FROM cpu WHERE name LIKE ? AND price BETWEEN ? AND ?"
-    params = ('%' + brand + '%', price_range[0], price_range[1])
-
-    if core_clock:
-        query += " AND core_clock >= ?"
-        params += (core_clock,)
-
-    if core_count:
-        query += " AND core_count >= ?"
-        params += (core_count,)
-
-    query += " ORDER BY price DESC"  
-    cursor.execute(query, params)
-    cpus = cursor.fetchall()
-    conn.close()
-    return cpus
-
-# Ask the user a series of questions to determine CPU filtering preferences
-async def ask_for_preferences(ctx):
-    await ctx.send("What is your minimum price range?")
-    min_price_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-    min_price = float(min_price_msg.content)
-
-    await ctx.send("What is your maximum price range?")
-    max_price_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-    max_price = float(max_price_msg.content)
-
-    await ctx.send("Which brand do you prefer? (Intel/AMD)")
-    brand_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-    brand = brand_msg.content.lower()
-
-    if not any(brand_name in brand for brand_name in ['intel', 'amd']):
-        await ctx.send("Invalid brand. Please choose either 'Intel' or 'AMD'.")
-        return await ask_for_preferences(ctx)
-
-    await ctx.send("What is the minimum core clock speed you prefer? (Enter 'None' if not specified)")
-    core_clock_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-    core_clock = float(core_clock_msg.content) if core_clock_msg.content.lower() != 'none' else None
-
-    await ctx.send("What is the minimum core count you prefer? (Enter 'None' if not specified)")
-    core_count_msg = await bot.wait_for('message', check=lambda m: m.author == ctx.author)
-    core_count = int(core_count_msg.content) if core_count_msg.content.lower() != 'none' else None
-
-    return min_price, max_price, brand, core_clock, core_count
-
-# Function to chunk a list into smaller lists for pagination
-def chunk_list(lst, n):
-    return [lst[i:i + n] for i in range(0, len(lst), n)]
-
-# Display the filtered CPUs to the user in paginated embeds
-async def display_cpu_results(ctx, cpus):
-    if not cpus:
-        await ctx.send("No CPUs found matching the specified criteria.")
-        return
-
-    chunked_cpus = [cpus[i:i + 5] for i in range(0, len(cpus), 5)]
-    current_page = 0
-
-    embed = discord.Embed(title="Filtered CPUs", color=discord.Color.blue())
-
-    for cpu in chunked_cpus[current_page]:
-        embed.add_field(name=cpu[0], value=f"Price: £ {cpu[1]}", inline=False)
-
-    message = await ctx.send(embed=embed)
-    await message.add_reaction("⬅️")
-    await message.add_reaction("➡️")
-
-    def check(reaction, user):
-        return user == ctx.author and reaction.message == message and str(reaction.emoji) in ["⬅️", "➡️"]
-
-    async def on_reaction(reaction, user):
-        nonlocal current_page
-
-        if str(reaction.emoji) == "➡️" and current_page < len(chunked_cpus) - 1:
-            current_page += 1
-        elif str(reaction.emoji) == "⬅️" and current_page > 0:
-            current_page -= 1
-
-        new_embed = discord.Embed(title="Filtered CPUs", color=discord.Color.blue())
-
-        for cpu in chunked_cpus[current_page]:
-            new_embed.add_field(name=cpu[0], value=f"Price: £ {cpu[1]}", inline=False)
-
-        await message.edit(embed=new_embed)
-
-    bot.add_listener(on_reaction, 'on_reaction_add')
-
-    try:
-        await bot.wait_for('reaction_add', timeout=600, check=check)
-    except asyncio.TimeoutError:
-        await message.clear_reactions()
-
-# Query CPUs from the database based on the provided name
-def filter_cpus_by_name(name):
-    conn = sqlite3.connect('database/cpu.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM cpu WHERE name = ?", (name,))
-    cpus = cursor.fetchall()
-    conn.close()
-    return cpus
-
-# Add a CPU component based on the provided name
-@bot.command(name='add')
-async def add_component(ctx, *, component_name: str):
-    cpus = filter_cpus_by_name(component_name)
-    if cpus:
-        cpu_chosen = cpus[0][0] 
-        await ctx.send(f"You have chosen the CPU: {cpu_chosen}.")
-        return
-
-    await ctx.send("No component found matching this criteria.")
+    embed = discord.Embed(title="Help", description="I'm here to help you build a PC.")
+    embed.add_field(name="Commands", value="!cpu - Find CPUs\n!add <component name> - Add components to the build", inline=False)
+    await interaction.response.send_message(embed=embed)
 
 # Command to initiate CPU filtering process
 @bot.command(name='cpu')
 async def cpu_filter(ctx):
     await ctx.send("You will get asked a range of questions for us to filter the CPUs for your desired results.")
-    await ask_for_preferences(ctx)
+    await display_cpu_results(bot, ctx)
 
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandNotFound):
-        await ctx.send("Sorry, I couldn't find that command. Type !help for a list of available commands.")
+# Command to initiate GPU filtering process
+@bot.command(name='gpu')
+async def cpu_filter(ctx):
+    await ctx.send("You will get asked a range of questions for us to filter the GPUs for your desired results.")
+    await display_gpu_results(bot, ctx)
 
-bot.run(TOKEN)
+# Command to initiate Case filtering process
+@bot.command(name='case')
+async def cpu_filter(ctx):
+    await ctx.send("You will get asked a range of questions for us to filter the cases for your desired results.")
+    await display_case_results(bot, ctx)
+
+@bot.command(name='caseFan')
+async def cpu_filter(ctx):
+    await ctx.send("You will get asked a range of questions for us to filter the case fans for your desired results.")
+    await display_caseFan_results(bot, ctx)
+
+@bot.command(name='add')
+async def add_component(ctx, *, component_name: str):
+    cpus = filter_cpus_by_name(component_name)
+    if cpus:
+        cpu_chosen = cpus[0][0]
+        price_info, image_link, search_url_info = scrape_ebay(cpu_chosen)
+
+        user_id = ctx.author.id
+        added_components.setdefault(user_id, []).append(cpu_chosen)
+
+        embed = discord.Embed(title="Component Added", description=f"You have chosen the CPU: {cpu_chosen}.")
+        embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}")
+        embed.set_thumbnail(url=image_link)
+
+        await ctx.send(embed=embed)
+        return
+    gpus = filter_gpus_by_name(component_name)
+    if gpus:
+        gpu_chosen = gpus[0][0]
+        price_info, image_link, search_url_info = scrape_ebay(gpu_chosen)
+
+        user_id = ctx.author.id
+        added_components.setdefault(user_id, []).append(gpu_chosen)
+
+        embed = discord.Embed(title="Component Added", description=f"You have chosen the GPU: {gpu_chosen}.")
+        embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}")
+        embed.set_thumbnail(url=image_link)
+
+        await ctx.send(embed=embed)
+        return    
+    cases = filter_cases_by_name(component_name)
+    if cases:
+        case_chosen = cases[0][0]
+        price_info, image_link, search_url_info = scrape_ebay(case_chosen)
+
+        user_id = ctx.author.id
+        added_components.setdefault(user_id, []).append(case_chosen)
+
+        embed = discord.Embed(title="Component Added", description=f"You have chosen the Case: {case_chosen}.")
+        embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}")
+        embed.set_thumbnail(url=image_link)
+
+        await ctx.send(embed=embed)
+        return
+    caseFans = filter_caseFans_by_name(component_name)
+    if caseFans:
+        caseFan_chosen = caseFans[0][0]
+        price_info, image_link, search_url_info = scrape_ebay(caseFan_chosen)
+        user_id = ctx.author.id
+        added_components.setdefault(user_id, []).append(caseFan_chosen)
+
+        embed = discord.Embed(title="Component Added", description=f"You have chosen the Case Fan: {caseFan_chosen}.")
+        embed.add_field(name="eBay Information", value=f"{price_info}\n{search_url_info}")
+        embed.set_thumbnail(url=image_link)
+
+        await ctx.send(embed=embed)
+        return
+    
+    embed = discord.Embed(title="Component Not Found", description="No component found matching this criteria.")
+    await ctx.send(embed=embed)
+
+@bot.command(name='build')
+async def show_build(ctx):
+    user_id = ctx.author.id
+    components = added_components.get(user_id, [])
+
+    if components:
+        embed = discord.Embed(title="Build Components", description="Components added to your build:")
+        for component in components:
+            embed.add_field(name="Component", value=component, inline=False)
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send("No components added to your build yet.")
+
+@bot.command(name='remove')
+async def remove_component(ctx, *, component_name: str):
+    user_id = ctx.author.id
+    user_components = added_components.get(user_id, [])  # Get the components added by the user
+
+    component_name_lower = component_name.lower()
+    user_components_lower = [component.lower() for component in user_components]
+
+    if component_name_lower in user_components_lower:
+        index = user_components_lower.index(component_name_lower)
+        removed_component = user_components.pop(index)
+
+        await ctx.send(f"Component '{removed_component}' has been removed from the build.")
+    else:
+        await ctx.send(f"Component '{component_name}' is not in the build.")
+
+@bot.command(name='suggest')
+async def suggest_similar(ctx):
+    user_id = ctx.author.id
+    user_components = added_components.get(user_id, [])
+
+    if not user_components:
+        await ctx.send("No components added to your build yet.")
+        return
+
+    last_component_type = get_component_type(user_components[-1])
+    similar_components = find_similar_components(last_component_type)
+
+    if similar_components:
+        embed = discord.Embed(title="Similar Components", description=f"Suggested components similar to the last added {last_component_type}:")
+
+        for component in similar_components:
+            embed.add_field(name="Component", value=component, inline=False)
+
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send(f"No similar components found for {last_component_type}.")
+
+def get_component_type(component_name):
+    return component_name.split()[0]
+
+def find_similar_components(component_type):
+    if component_type.lower() == 'amd':
+        return ['AMD Ryzen 9 5900X', 'AMD Ryzen 7 5800X', 'AMD Ryzen 5 5600X']
+    elif component_type.lower() == 'intel':
+        return ['Intel Core i9-11900K', 'Intel Core i7-11700K', 'Intel Core i5-11600K']
+    else:
+        return []
+
+# Define the pre-built PCs specifications
+prebuilt_pcs = {
+    "General Desktop PC": {
+        "CPU": "Intel Core i5-11400F 2.6GHz 6-Core",
+        "Cooling System": "Assassin 120 SE 66 CFM",
+        "Motherboard": "H510M K V2",
+        "RAM": "16GB(2 x 8GB) DDR4-3200",
+        "Storage": "512GB NVMe SSD",
+        "GPU": "GeForce GTX 1650",
+        "Case": "4000D Mid Tower",
+        "Power Supply":"RM750e 750W",
+        "Price": "£750",
+        "PcPartPicker link": "https://uk.pcpartpicker.com/list/tPDdWt"
+    },
+    "Gaming PC": {
+        "CPU": "AMD Ryzen 5 5600X 3.7GHz 6-Core",
+        "Cooling System": "iCUE H100i RGB ELITE 59 CFM",
+        "Motherboard": "ASUS TUF GAMING B550-PLUS",
+        "RAM": "16GB(2 x 8GB) DDR4 3600MHz",
+        "Storage": "1TB NVMe SSD",
+        "GPU": "GeForce RTX 3060 Ti",
+        "Case": "Meshify C Mid Tower",
+        "Power Supply":"RM850e 850W",
+        "Price": "£1300",
+        "PcPartPicker link": "https://uk.pcpartpicker.com/list/CnBpn6"
+    },
+    "High Performance PC": {
+        "CPU": "Intel Core i9-14900KF 3.2GHz 24-Core",
+        "Cooling System": "Kraken Elite 78 CFM",
+        "Motherboard": "MSI PRO Z790-A MAX WIFI",
+        "RAM": "32GB(2 x 16GB) DDR5 5200MHz",
+        "Storage": "2TB M.2 PCle NVMe SSD",
+        "GPU": "GeForce RTX 4090",
+        "Case": "Lian Li O11 Mid Tower",
+        "Power Supply":"V850 SFX COLD 850W",
+        "Price": "£3450",
+        "PcPartPicker link": "https://uk.pcpartpicker.com/list/kJhN7R"
+    }
+}
+
+@bot.command(name='pre-built')
+async def prebuilt_pc(ctx):
+    for pc_name, specs in prebuilt_pcs.items():
+        embed = discord.Embed(title=pc_name, description="Considering your budget and needs, you can have a look at the specifications below:")
+
+        components = "\n".join([f"**{component}:** {value}" for component, value in specs.items()])
+        embed.add_field(name="Specifications", value=components, inline=False)
+
+        await ctx.send(embed=embed)
+
+bot.run(TOKEN) 
